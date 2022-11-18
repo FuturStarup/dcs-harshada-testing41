@@ -1,6 +1,6 @@
 name: Code Scan
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       organization_name:
         description: 'Organization name'
