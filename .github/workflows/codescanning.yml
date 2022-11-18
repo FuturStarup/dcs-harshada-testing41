@@ -1,0 +1,141 @@
+name: Code Scan
+on:
+  workflow_call:
+    inputs:
+      organization_name:
+        description: 'Organization name'
+        required: true
+        default: 'FuturStarup'
+        type: string
+      topics:
+        description: 'topics list separated by commas. Ex: topic1,topic2'
+        required: true
+        type: string
+      terraform_dependency_validation:
+        description: 'Terraform dependency validation (disabled / enabled)'
+        required: true
+        default: 'disabled'
+        type: string
+
+    secrets:
+      token:
+        required: true
+jobs:
+  code_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout action repository
+        uses: actions/checkout@v3
+
+      - name: Check for github cli
+        id: check-gh
+        run: |
+          if [[ $(gh --version >/dev/null 2>&1; echo $?) -eq 0 ]]; then
+            echo "::set-output name=gh_exist::true" 
+          else
+            echo "::set-output name=gh_exist::false" 
+          fi
+
+      - name: Setup github cli
+        if: steps.check-gh.outputs.gh_exist == 'false'
+        run: |
+          # Install gh cli
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          apt update && apt install gh
+
+      - name: login to github cli
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}  
+        run: |
+          # Authenticate with Github.com
+          echo "Authenticate with Github.com"
+          TOKEN_FILE=$(mktemp)  &&  echo -n ${GITHUB_TOKEN} > ${TOKEN_FILE}  &&  unset GITHUB_TOKEN
+          gh auth login --with-token < ${TOKEN_FILE}  &&  gh auth setup-git
+
+      - name: Get list repositories
+        id: list-repos
+        env:
+          GH_TOKEN: ${{ secrets.MY_TOKEN }}
+          TOPICS: ${{ inputs.topics}}
+          ORGANIZATION_NAME: ${{ inputs.organization_name}}
+        run: |
+          echo "::set-output name=repos::$(gh search repos --topic ${TOPICS} --owner ${ORGANIZATION_NAME} --json name)" 
+
+      - name: Scanning Terraform modules in repositories
+        if: ${{ inputs.terraform_dependency_validation}} == 'enabled'
+        env:
+          GH_TOKEN: ${{ secrets.MY_TOKEN}}
+          REPOSITORIES: ${{ steps.list-repos.outputs.repos }}
+          ORGANIZATION_NAME: ${{ inputs.organization_name}}
+            
+        run: |
+          for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
+            _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
+            echo -n "Checking for terraform modules... "
+            if [ (gh api -H "Accept: application/vnd.github+json" repos/$(ORGANIZATION_NAME)/$(_jq '.name')/languages --jq ."HCL") == "" ] 
+            then
+              echo "No Terraform modules Founds!"
+            else
+              echo "Terraform modules present!";
+              echo -n "Checking for dependabot.yml file existance in .github/workflows/ directory... ";
+              
+              default_branch_name=$(gh api -H "Accept: application/vnd.github+json" repos/$(ORGANIZATION_NAME)/$(_jq '.name') --jq ."default_branch")
+              default_branch_sha=$(gh api -H "Accept: application/vnd.github+json" repos/$(ORGANIZATION_NAME)/$(_jq '.name')/branches/${default_branch_name} --jq ."commit.sha")
+              github_folder_sha=$(gh api repos/$(ORGANIZATION_NAME)/$(_jq '.name')/git/trees/${default_branch_sha} | jq -r '.tree[] | select(.path==".github") | .sha')
+
+              EXIST="false"
+              if [ $github_folder_sha != "" ]
+              then
+                  workflows_folder_sha=$(gh api repos/$(ORGANIZATION_NAME)/$(_jq '.name')/git/trees/${github_folder_sha} | jq -r '.tree[] | select(.path=="workflows") | .sha')
+                  if [ $workflows_folder_sha != "" ]
+                  then
+                      dependabot_file_sha=$(gh api repos/$(ORGANIZATION_NAME)/$(_jq '.name')/git/trees/${workflows_folder_sha} | jq -r '.tree[] | select(.path=="dependabot.yaml") | .sha')
+                      if [ ! -z "$dependabot_file_sha" ]
+                      then
+                          EXIST="true"
+                      fi
+                  fi
+              fi
+
+              if [ $EXIST = "false" ]
+              then
+                  echo "NOT EXIST!"
+                  # create new branch from the default branch
+                  new_branch_sha=$(gh api --method POST -H "Accept: application/vnd.github+json" repos/$(ORGANIZATION_NAME)/$(_jq '.name')/git/refs -f ref="refs/heads/onecloudatomation-dependabot-autoremediation" -f sha="${default_branch_sha}" --jq ."object.sha")
+                  # COPY the file content of dependabot.yaml 
+                  dependabot_file_content=$(cat resources/dependabot.yaml)
+                  # Create blob for dependabot.yaml
+                  created_blob_sha=$(gh api --method POST repos/$(ORGANIZATION_NAME)/$(_jq '.name')/git/blobs -f content="${dependabot_file_content}" -f encoding="utf-8" --jq ."sha")
+                  # Create tree for dependabot.yaml
+                  dependabot_tree_sha=$(curl -X POST -H "Authorization: Bearer ${GH_TOKEN}" https://api.github.com/repos/$(ORGANIZATION_NAME)/$(_jq '.name')/git/trees -d "{\"base_tree\":\"${new_branch_sha}\",\"tree\":[{\"path\":\".github/workflows/dependabot.yaml\",\"mode\":\"100644\",\"type\":\"blob\",\"sha\":\"${created_blob_sha}\"}]}" | jq ."sha")
+                  # Fetch all the parents commit for the history => required to create the merge request later
+                  parents_commits_sha=$(gh api -H "Accept: application/vnd.github+json" repos/$(ORGANIZATION_NAME)/$(_jq '.name')/branches/${default_branch_name} --jq '[.commit.parents[] | select(true).sha]')
+                  # Commit the change
+                  new_commit_sha=$(curl -X POST -H "Authorization: Bearer ${GH_TOKEN}" https://api.github.com/repos/$(ORGANIZATION_NAME)/$(_jq '.name')/git/commits -d "{\"message\":\"my commit message\",\"tree\":${dependabot_tree_sha},\"parents\":${parents_commits_sha}}" | jq ."sha")
+                  echo -n "Pushing the new branch... "
+                  ref=$(curl -X PATCH -H "Authorization: Bearer ${GH_TOKEN}"  https://api.github.com/repos/$(ORGANIZATION_NAME)/$(_jq '.name')/git/refs/heads/onecloudatomation-dependabot-autoremediation -d "{\"sha\":${new_commit_sha},\"force\":true}" | jq ."ref")
+                  echo -n "Pushing the new branch... "
+                  if [ $ref != "" ]
+                  then
+                      echo  "Ok"
+                      echo -n "Creating merge request on ${default_branch_name}... "
+                      new_pull_request_id=$(gh api --method POST -H "Accept: application/vnd.github+json" repos/$(ORGANIZATION_NAME)/$(_jq '.name')/pulls -f title='onecloudatomation codeql autoremediation' -f body='Please pull these awesome changes in!' -f head='onecloudatomation-dependabot-autoremediation' -f base='main' | jq ."id")
+                      if [ $new_pull_request_id != "" ]
+                      then
+                          echo "Ok"
+                      else
+                          echo "Failed"
+                      fi
+                  else
+                      echo "Failed"
+                  fi
+              else
+                  echo "EXIST!"
+              fi
+
+            fi
+          done
+
+
+     
