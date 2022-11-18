@@ -18,7 +18,7 @@ on:
         type: string
 
     secrets:
-      token:
+      MY_TOKEN:
         required: true
 jobs:
   code_scan:
