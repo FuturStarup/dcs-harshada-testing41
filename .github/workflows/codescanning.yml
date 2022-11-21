@@ -14,7 +14,6 @@ on:
       terraform_dependency_validation:
         description: 'Terraform dependency validation (disabled / enabled)'
         required: true
-        default: 'disabled'
         options:
         - disabled
         - enabled
