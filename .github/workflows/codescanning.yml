@@ -62,7 +62,7 @@ jobs:
           echo "::set-output name=repos::$(gh search repos --topic ${TOPICS} --owner ${ORGANIZATION_NAME} --json name)" 
 
       - name: Scanning Terraform modules in repositories
-        if: ${{ inputs.terraform_dependency_validation}} == 'enabled'
+        if: ${{ inputs.terraform_dependency_validation}} = 'enabled'
         env:
           GH_TOKEN: ${{ secrets.token}}
           REPOSITORIES: ${{ steps.list-repos.outputs.repos }}
@@ -72,7 +72,7 @@ jobs:
           for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
             echo -n "Checking for terraform modules... "
-            if [ $(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/languages --jq ."HCL") == "" ] 
+            if [ $(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/languages --jq ."HCL") = "" ] 
             then
               echo "No Terraform modules Founds!"
             else
@@ -92,7 +92,15 @@ jobs:
                       dependabot_file_sha=$(gh api repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/trees/${workflows_folder_sha} | jq -r '.tree[] | select(.path=="dependabot.yaml") | .sha')
                       if [ ! -z "$dependabot_file_sha" ]
                       then
-                          EXIST="true"
+                          # Checking if there is already branch created to add the file
+                          onecloudatomation-dependabot-autoremediation-branch-sha=$(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/branches/onecloudatomation-dependabot-autoremediation --jq ."commit.sha")
+                          if [ $onecloudatomation-dependabot-autoremediation-branch-sha != "" ]
+                          then
+                            echo -n "The branch already exist !"
+                            EXIST="false"
+                          else
+                            EXIST="true"
+                          fi
                       fi
                   fi
               fi
