@@ -71,6 +71,7 @@ jobs:
         run: |
           for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
+            echo -n "**** CHECKING $(_jq '.name') REPOSITORY ****"
             echo -n "Checking for terraform modules... "
             if [ "$(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/languages --jq ."HCL")" = "" ] 
             then
@@ -104,10 +105,8 @@ jobs:
                   branch=$(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/branches | jq -r '.[] | select(.name=="onecloudatomation-dependabot-autoremediation")')
                   if [ ! -z "$branch" ]
                   then
-                    echo -n "There si already a branch named 'onecloudatomation-dependabot-autoremediation' that was created to add the file!"
+                    echo -n "There is already a branch named 'onecloudatomation-dependabot-autoremediation' that was created to add the file!"
                     continue
-                  else
-                    echo -n "hello"
                   fi
                   # create new branch from the default branch
                   new_branch_sha=$(gh api --method POST -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/refs -f ref="refs/heads/onecloudatomation-dependabot-autoremediation" -f sha="${default_branch_sha}" --jq ."object.sha")
