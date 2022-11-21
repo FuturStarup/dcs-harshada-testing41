@@ -15,7 +15,10 @@ on:
         description: 'Terraform dependency validation (disabled / enabled)'
         required: true
         default: 'disabled'
-        type: string
+        options:
+        - disabled
+        - enabled
+
 
     secrets:
       token:
