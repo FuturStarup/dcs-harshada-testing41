@@ -62,7 +62,7 @@ jobs:
           echo "::set-output name=repos::$(gh search repos --topic ${TOPICS} --owner ${ORGANIZATION_NAME} --json name)" 
 
       - name: Scanning Terraform modules in repositories
-        if: ${{ inputs.terraform_dependency_validation}} == 'enabled'
+        if: inputs.terraform_dependency_validation == 'enabled'
         env:
           GH_TOKEN: ${{ secrets.token}}
           REPOSITORIES: ${{ steps.list-repos.outputs.repos }}
