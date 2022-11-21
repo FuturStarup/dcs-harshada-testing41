@@ -18,7 +18,7 @@ on:
         type: string
 
     secrets:
-      MY_TOKEN:
+      token:
         required: true
 jobs:
   code_scan:
@@ -43,10 +43,9 @@ jobs:
           curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
           apt update && apt install gh
-
       - name: login to github cli
         env:
-          GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}  
+          GITHUB_TOKEN: ${{ secrets.token }}  
         run: |
           # Authenticate with Github.com
           echo "Authenticate with Github.com"
@@ -56,7 +55,7 @@ jobs:
       - name: Get list repositories
         id: list-repos
         env:
-          GH_TOKEN: ${{ secrets.MY_TOKEN }}
+          GH_TOKEN: ${{ secrets.token }}
           TOPICS: ${{ inputs.topics}}
           ORGANIZATION_NAME: ${{ inputs.organization_name}}
         run: |
@@ -65,7 +64,7 @@ jobs:
       - name: Scanning Terraform modules in repositories
         if: ${{ inputs.terraform_dependency_validation}} == 'enabled'
         env:
-          GH_TOKEN: ${{ secrets.MY_TOKEN}}
+          GH_TOKEN: ${{ secrets.token}}
           REPOSITORIES: ${{ steps.list-repos.outputs.repos }}
           ORGANIZATION_NAME: ${{ inputs.organization_name}}
             
