@@ -72,7 +72,7 @@ jobs:
           for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
             echo -n "Checking for terraform modules... "
-            if [ $(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/languages --jq ."HCL") = "" ] 
+            if [ "$(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/languages --jq ."HCL")" = "" ] 
             then
               echo "No Terraform modules Founds!"
             else
@@ -97,12 +97,12 @@ jobs:
                   fi
               fi
 
-              if [ $EXIST = "false" ]
+              if [ "$EXIST" = "false" ]
               then
                   echo "NOT EXIST!"
                   # Checking if there is already branch created to add the file
                   branch=$(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/branches/onecloudatomation-dependabot-autoremediation)
-                  if [ ! -z $branch.name ]
+                  if [ !-z $branch.name ]
                   then
                     echo -n "There si already a branch named 'onecloudatomation-dependabot-autoremediation' that was created to add the file!"
                     continue
