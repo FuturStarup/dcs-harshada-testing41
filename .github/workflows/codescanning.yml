@@ -85,7 +85,7 @@ jobs:
               github_folder_sha=$(gh api repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/trees/${default_branch_sha} | jq -r '.tree[] | select(.path==".github") | .sha')
 
               EXIST="false"
-              if [ $github_folder_sha != "" ]
+              if [ "$github_folder_sha" != "" ]
               then
                   workflows_folder_sha=$(gh api repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/trees/${github_folder_sha} | jq -r '.tree[] | select(.path=="workflows") | .sha')
                   if [ $workflows_folder_sha != "" ]
