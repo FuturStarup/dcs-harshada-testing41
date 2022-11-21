@@ -97,7 +97,7 @@ jobs:
                   fi
               fi
 
-              if [ "$EXIST" = "false" ]
+              if [ $EXIST = "false" ]
               then
                   echo "NOT EXIST!"
                   # Checking if there is already branch created to add the file
