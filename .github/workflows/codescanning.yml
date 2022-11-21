@@ -102,11 +102,13 @@ jobs:
                   echo "NOT EXIST!"
                   # Checking if there is already branch created to add the file
                   branch=$(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/branches/onecloudatomation-dependabot-autoremediation)
-                  echo $branch
+                  echo $branch.name
                   if [ ! -z $branch.name ]
                   then
                     echo -n "There si already a branch named 'onecloudatomation-dependabot-autoremediation' that was created to add the file!"
                     continue
+                  else
+                    echo -n "hello"
                   fi
                   # create new branch from the default branch
                   new_branch_sha=$(gh api --method POST -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/refs -f ref="refs/heads/onecloudatomation-dependabot-autoremediation" -f sha="${default_branch_sha}" --jq ."object.sha")
