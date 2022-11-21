@@ -102,7 +102,8 @@ jobs:
                   echo "NOT EXIST!"
                   # Checking if there is already branch created to add the file
                   branch=$(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/branches/onecloudatomation-dependabot-autoremediation)
-                  if [ !-z $branch.name ]
+                  echo $branch
+                  if [ ! -z $branch.name ]
                   then
                     echo -n "There si already a branch named 'onecloudatomation-dependabot-autoremediation' that was created to add the file!"
                     continue
