@@ -72,7 +72,7 @@ jobs:
           for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
             echo -n "Checking for terraform modules... "
-            if [ (gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/languages --jq ."HCL") == "" ] 
+            if [ $(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/languages --jq ."HCL") == "" ] 
             then
               echo "No Terraform modules Founds!"
             else
