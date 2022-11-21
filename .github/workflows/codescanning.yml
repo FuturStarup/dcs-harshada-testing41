@@ -92,15 +92,7 @@ jobs:
                       dependabot_file_sha=$(gh api repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/trees/${workflows_folder_sha} | jq -r '.tree[] | select(.path=="dependabot.yaml") | .sha')
                       if [ ! -z "$dependabot_file_sha" ]
                       then
-                          # Checking if there is already branch created to add the file
-                          onecloudatomation-dependabot-autoremediation-branch-sha=$(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/branches/onecloudatomation-dependabot-autoremediation --jq ."commit.sha")
-                          if [ $onecloudatomation-dependabot-autoremediation-branch-sha != "" ]
-                          then
-                            echo -n "The branch already exist !"
-                            EXIST="false"
-                          else
-                            EXIST="true"
-                          fi
+                          EXIST="true"
                       fi
                   fi
               fi
@@ -108,6 +100,13 @@ jobs:
               if [ $EXIST = "false" ]
               then
                   echo "NOT EXIST!"
+                  # Checking if there is already branch created to add the file
+                  onecloudatomation-dependabot-autoremediation-branch-sha=$(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/branches/onecloudatomation-dependabot-autoremediation --jq ."commit.sha")
+                  if [ $onecloudatomation-dependabot-autoremediation-branch-sha != "" ]
+                  then
+                    echo -n "There si already a branch named 'onecloudatomation-dependabot-autoremediation' that was created to add the file!"
+                    continue
+                  fi
                   # create new branch from the default branch
                   new_branch_sha=$(gh api --method POST -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/refs -f ref="refs/heads/onecloudatomation-dependabot-autoremediation" -f sha="${default_branch_sha}" --jq ."object.sha")
                   # COPY the file content of dependabot.yaml 
