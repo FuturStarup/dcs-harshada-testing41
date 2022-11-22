@@ -9,7 +9,7 @@ jobs:
   Scanning-Terraform-modules-in-repositories:
     runs-on: ubuntu-latest
     steps:
-    - name: Scanning-Terraform modules in repositories
+      - name: Scanning-Terraform modules in repositories
         uses: ./.github/workflows/codescanning.yml
         with:
           #### Required Inputs ####
