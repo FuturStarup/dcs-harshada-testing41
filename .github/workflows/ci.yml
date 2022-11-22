@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:   
       - name: Undo Test Scanning Terraform modules in repositories
+        env:
+          GH_TOKEN: ${{ secrets.token }}
         run: |-
               gh api --method DELETE -H "Accept: application/vnd.github+json" repos/FuturStarup/dcs-karim_test_6/git/refs/heads/onecloudatomation-dependabot-autoremediation
 
