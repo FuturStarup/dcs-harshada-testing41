@@ -7,7 +7,7 @@ on:
       - main
 jobs:
   Scanning-Terraform-modules-in-repositories:
-    uses: FuturStarup/dcs-harshada-testing41/actions/workflows/codescanning.yml
+    uses: ./.github/workflows/codescanning.yml
     with:
       #### Required Inputs ####
       organization_name: FuturStarup
