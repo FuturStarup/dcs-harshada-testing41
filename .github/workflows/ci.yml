@@ -13,8 +13,8 @@ jobs:
       organization_name: FuturStarup
       topics: test
       terraform_dependency_validation: enabled
-      secrets:
-        token: ${{ secrets.token}}
+    secrets:
+      token: ${{ secrets.token }}
 
 
   Undo-tests:
