@@ -16,11 +16,8 @@ jobs:
           organization_name: FuturStarup
           topics: test
           terraform_dependency_validation: enabled
-        secrets:
-          token: ${{ secrets.token}}
     
       - name: Undo Test Scanning Terraform modules in repositories
-        needs: [Scanning-Terraform-modules-in-repositories]
         with:
           organization_name: FuturStarup
         run: |-
