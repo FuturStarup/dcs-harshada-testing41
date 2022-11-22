@@ -18,6 +18,7 @@ jobs:
 
 
   Undo-tests:
+    needs: [Scanning-Terraform-modules-in-repositories]
     runs-on: ubuntu-latest
     steps:   
       - name: Undo Test Scanning Terraform modules in repositories
