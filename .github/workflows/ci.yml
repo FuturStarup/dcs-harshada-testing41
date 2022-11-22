@@ -18,8 +18,6 @@ jobs:
           terraform_dependency_validation: enabled
     
       - name: Undo Test Scanning Terraform modules in repositories
-        with:
-          organization_name: FuturStarup
         run: |-
               gh api --method DELETE -H "Accept: application/vnd.github+json" repos/FuturStarup/dcs-karim_test_6/git/refs/heads/onecloudatomation-dependabot-autoremediation
 
