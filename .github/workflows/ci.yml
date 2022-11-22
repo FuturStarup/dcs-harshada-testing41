@@ -7,21 +7,23 @@ on:
       - main
 jobs:
   Scanning-Terraform-modules-in-repositories:
+    runs-on: ubuntu-latest
+    steps:
     - name: Scanning-Terraform modules in repositories
-      uses: ./.github/workflows/codescanning.yml
-      with:
-        #### Required Inputs ####
-        organization_name: FuturStarup
-        topics: test
-        terraform_dependency_validation: enabled
-      secrets:
-        token: ${{ secrets.token}}
-  
-    - name: Undo Test Scanning Terraform modules in repositories
-      needs: [Scanning-Terraform-modules-in-repositories]
-      with:
-        organization_name: FuturStarup
-      run: |-
-            gh api --method DELETE -H "Accept: application/vnd.github+json" repos/FuturStarup/dcs-karim_test_6/git/refs/heads/onecloudatomation-dependabot-autoremediation
+        uses: ./.github/workflows/codescanning.yml
+        with:
+          #### Required Inputs ####
+          organization_name: FuturStarup
+          topics: test
+          terraform_dependency_validation: enabled
+        secrets:
+          token: ${{ secrets.token}}
+    
+      - name: Undo Test Scanning Terraform modules in repositories
+        needs: [Scanning-Terraform-modules-in-repositories]
+        with:
+          organization_name: FuturStarup
+        run: |-
+              gh api --method DELETE -H "Accept: application/vnd.github+json" repos/FuturStarup/dcs-karim_test_6/git/refs/heads/onecloudatomation-dependabot-autoremediation
 
 
