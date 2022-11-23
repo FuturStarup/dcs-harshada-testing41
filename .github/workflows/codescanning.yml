@@ -69,6 +69,7 @@ jobs:
           ORGANIZATION_NAME: ${{ inputs.organization_name}}
             
         run: |
+          set -x
           for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
             echo -n "**** CHECKING $(_jq '.name') REPOSITORY ****"
