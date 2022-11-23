@@ -133,9 +133,11 @@ jobs:
                           echo "Ok"
                       else
                           echo "Failed"
+                          exit 1
                       fi
                   else
                       echo "Failed"
+                      exit 1
                   fi
               else
                   echo "EXIST!"
