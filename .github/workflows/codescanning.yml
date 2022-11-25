@@ -116,20 +116,20 @@ jobs:
                   # Create blob for dependabot.yaml
                   created_blob_sha=$(gh api --method POST repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/blobs -f content="${dependabot_file_content}" -f encoding="utf-8" --jq ."sha")
                   # Create tree for dependabot.yaml
-                  dependabot_tree_sha=$(curl -X POST -H "Authorization: Bearer ${GH_TOKEN}" https://api.github.com/repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/trees -d "{\"base_tree\":\"${new_branch_sha}\",\"tree\":[{\"path\":\".github/workflows/dependabot.yaml\",\"mode\":\"100644\",\"type\":\"blob\",\"sha\":\"${created_blob_sha}\"}]}" | jq ."sha")
+                  dependabot_tree_sha=$(curl --request POST -H "Authorization: Bearer ${GH_TOKEN}" https://api.github.com/repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/trees -d "{\"base_tree\":\"${new_branch_sha}\",\"tree\":[{\"path\":\".github/workflows/dependabot.yaml\",\"mode\":\"100644\",\"type\":\"blob\",\"sha\":\"${created_blob_sha}\"}]}" | jq ."sha")
                   # Fetch all the parents commit for the history => required to create the merge request later
                   parents_commits_sha=$(gh api -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/branches/${default_branch_name} --jq '[.commit.parents[] | select(true).sha]')
                   # Commit the change
-                  new_commit_sha=$(curl -X POST -H "Authorization: Bearer ${GH_TOKEN}" https://api.github.com/repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/commits -d "{\"message\":\"my commit message\",\"tree\":${dependabot_tree_sha},\"parents\":${parents_commits_sha}}" | jq ."sha")
+                  new_commit_sha=$(curl --request POST -H "Authorization: Bearer ${GH_TOKEN}" https://api.github.com/repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/commits -d "{\"message\":\"my commit message\",\"tree\":${dependabot_tree_sha},\"parents\":${parents_commits_sha}}" | jq ."sha")
                   echo -n "Pushing the new branch... "
-                  ref=$(curl -X PATCH -H "Authorization: Bearer ${GH_TOKEN}"  https://api.github.com/repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/refs/heads/onecloudatomation-dependabot-autoremediation -d "{\"sha\":${new_commit_sha},\"force\":true}" | jq ."ref")
+                  ref=$(curl ---request PATCH -H "Authorization: Bearer ${GH_TOKEN}"  https://api.github.com/repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/refs/heads/onecloudatomation-dependabot-autoremediation -d "{\"sha\":${new_commit_sha},\"force\":true}" | jq ."ref")
                   echo -n "Pushing the new branch... "
-                  if [ $ref != "" ]
+                  if [ ! -z $ref ]
                   then
                       echo  "Ok"
                       echo -n "Creating merge request on ${default_branch_name}... "
                       new_pull_request_id=$(gh api --method POST -H "Accept: application/vnd.github+json" repos/${ORGANIZATION_NAME}/$(_jq '.name')/pulls -f title='onecloudatomation codeql autoremediation' -f body='Please pull these awesome changes in!' -f head='onecloudatomation-dependabot-autoremediation' -f base='main' | jq ."id")
-                      if [ $new_pull_request_id != "" ]
+                      if [ ! -z $new_pull_request_id ]
                       then
                           echo "Ok"
                       else
