@@ -122,7 +122,7 @@ jobs:
                   # Commit the change
                   new_commit_sha=$(curl --request POST -H "Authorization: Bearer ${GH_TOKEN}" https://api.github.com/repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/commits -d "{\"message\":\"my commit message\",\"tree\":${dependabot_tree_sha},\"parents\":${parents_commits_sha}}" | jq ."sha")
                   echo -n "Pushing the new branch... "
-                  ref=$(curl ---request PATCH -H "Authorization: Bearer ${GH_TOKEN}"  https://api.github.com/repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/refs/heads/onecloudatomation-dependabot-autoremediation -d "{\"sha\":${new_commit_sha},\"force\":true}" | jq ."ref")
+                  ref=$(curl --request PATCH -H "Authorization: Bearer ${GH_TOKEN}"  https://api.github.com/repos/${ORGANIZATION_NAME}/$(_jq '.name')/git/refs/heads/onecloudatomation-dependabot-autoremediation -d "{\"sha\":${new_commit_sha},\"force\":true}" | jq ."ref")
                   echo -n "Pushing the new branch... "
                   if [ ! -z $ref ]
                   then
