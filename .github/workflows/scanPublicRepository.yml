@@ -82,7 +82,7 @@ jobs:
             echo "yes"
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
             [[ ${{ inputs.report}}  = "true" ]] \
-              && echo "::warning repository_name=$(_jq '.name')::Repository is public, please updated its visibility to ${ inputs.type}" || (
+              && echo "::warning repository_name=$(_jq '.name')::Repository is public, please updated its visibility to ${{ inputs.type }}" || (
                 echo -n "Set '$(_jq '.name')' repository to  ${ inputs.type}... ";
                 [[ $(gh api -X PATCH repos/${ORGANIZATION_NAME}/$(_jq '.name') -f visibility='${inputs.type}' | jq ".visibility")  = ${inputs.type} ]] \
                   && echo "ok" || (
