@@ -7,6 +7,17 @@ on:
       - main
 jobs:
 
+  Scanning-public-repositories:
+    uses: ./.github/workflows/scanPublicRepository.yml
+    with:
+      organization_name: FuturStarup
+      type: private
+      report: false
+      enforce: true
+      runner_name: ubuntu-latest
+    secrets: inherit
+
+
   Scanning-Terraform-modules-in-repositories:
     uses: ./.github/workflows/codescanning.yml
     with:

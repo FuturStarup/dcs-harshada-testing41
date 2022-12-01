@@ -1,0 +1,93 @@
+name: Scan public repository
+on:
+  workflow_call:
+    inputs:
+      organization_name:
+        description: 'Organization name'
+        required: true
+        default: 'OneCloudAutomation'
+        type: string
+      enforce:
+        description: 'enforce change to defined type: internal or private'
+        required: false
+        default: true
+        type: boolean      
+      type:
+        description: 'change public repository to ( internal / private )'
+        required: false
+        default: private
+        type: string
+      report:
+        description: 'report it ( true / false )'
+        required: true
+        default: true
+        type: boolean      
+      runner_name:
+        description: 'Runner name'
+        default: ubuntu-latest
+        type: string
+    secrets:
+      token:
+        required: true
+jobs:
+  scanPublicRepositories:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout action repository
+        uses: actions/checkout@v3
+
+      - name: Check for github cli
+        id: check-gh
+        run: |
+          if [[ $(gh --version >/dev/null 2>&1; echo $?) -eq 0 ]]; then
+            echo "gh_exist=true" >> $env:GITHUB_OUTPUT
+          else 
+            echo "gh_exist=false" >> $env:GITHUB_OUTPUT
+          fi
+
+      - name: Setup github cli
+        if: steps.check-gh.outputs.gh_exist == 'false'
+        run: |
+          # Install gh cli
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update && sudo apt -y install gh
+
+      - name: login to github cli
+        env:
+          GITHUB_TOKEN: ${{ secrets.token }}  
+        run: |
+          # Authenticate with Github.com
+          echo "Authenticate with Github.com"
+          TOKEN_FILE=$(mktemp)  &&  echo -n ${GITHUB_TOKEN} > ${TOKEN_FILE}  &&  unset GITHUB_TOKEN
+          gh auth login --with-token < ${TOKEN_FILE}  &&  gh auth setup-git
+
+      - name: Get public repositories list
+        id: list-repos
+        env:
+          GH_TOKEN: ${{ secrets.token }}
+          ORGANIZATION_NAME: ${{ inputs.organization_name}}
+        run: |
+          echo "repos=$(gh search repos --owner ${ORGANIZATION_NAME} --visibility=public --json name)" >> $env:GITHUB_OUTPUT
+
+      - name: Scan public repositories
+        env:
+          GH_TOKEN: ${{ secrets.token}}
+          REPOSITORIES: ${{ steps.list-repos.outputs.repos }}
+          ORGANIZATION_NAME: ${{ inputs.organization_name}}
+          
+        run: |
+          for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
+            _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
+
+            [[ ${{ inputs.report}}  = "true" ]] \
+              && echo "::warning repository_name=$(_jq '.name')::Repository is public, please updated its visibility to ${ inputs.type}" || (
+                echo -n "Set '$(_jq '.name')' repository to  ${ inputs.type}... ";
+                [[ $(gh api -X PATCH repos/${ORGANIZATION_NAME}/$(_jq '.name') -f visibility='${inputs.type}' | jq ".visibility")  = ${inputs.type} ]] \
+                  && echo "ok" || (
+                    echo "failed";
+                    exit 1
+                )
+              )
+
+          done
