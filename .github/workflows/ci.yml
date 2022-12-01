@@ -7,11 +7,13 @@ on:
       - main
 jobs:
 
-  Scanning-Terraform-modules-in-repositories:
-    uses: ./.github/workflows/codescanning.yml
+  Scanning-public-repositories:
+    uses: ./.github/workflows/scanPublicRepository.yml
     with:
-      organization_name: OneCloudAutomation
-      topics: test-git-assurance
-      terraform_dependency_validation: enabled
+      organization_name: FuturStarup
+      new_type: private
+      report: false
+      enforce: true
+      runner_name: ubuntu-latest
     secrets:
       token: ${{ secrets.token }}
