@@ -11,7 +11,7 @@ jobs:
     uses: ./.github/workflows/scanPublicRepository.yml
     with:
       organization_name: FuturStarup
-      type: private
+      new_type: private
       report: false
       enforce: true
       runner_name: ubuntu-latest

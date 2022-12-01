@@ -12,7 +12,7 @@ on:
         required: false
         default: true
         type: boolean      
-      type:
+      new_type:
         description: 'change public repository to ( internal / private )'
         required: false
         default: private
@@ -75,7 +75,7 @@ jobs:
           GH_TOKEN: ${{ secrets.token}}
           REPOSITORIES: ${{ steps.list-repos.outputs.repos }}
           ORGANIZATION_NAME: ${{ inputs.organization_name}}
-          TYPE: ${{ inputs.type }}
+          TYPE: ${{ inputs.new_type }}
           
         run: |
           set -x
