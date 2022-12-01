@@ -78,7 +78,7 @@ jobs:
           TYPE: ${{ inputs.type }}
           
         run: |
-          echo "test"
+          set -x
           for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
             echo "yes"
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
@@ -91,5 +91,4 @@ jobs:
                     exit 1
                 )
               )
-
           done
