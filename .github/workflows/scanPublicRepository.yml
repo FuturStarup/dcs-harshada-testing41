@@ -77,10 +77,9 @@ jobs:
           ORGANIZATION_NAME: ${{ inputs.organization_name}}
           
         run: |
-          echo $REPOSITORIES
           for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
-
+              echo "yes"
             [[ ${{ inputs.report}}  = "true" ]] \
               && echo "::warning repository_name=$(_jq '.name')::Repository is public, please updated its visibility to ${ inputs.type}" || (
                 echo -n "Set '$(_jq '.name')' repository to  ${ inputs.type}... ";
