@@ -12,8 +12,8 @@ jobs:
     with:
       organization_name: FuturStarup
       new_type: private
-      report: true
-      enforce: false
+      report: false
+      enforce: true
       runner_name: ubuntu-latest
     secrets:
       token: ${{ secrets.token }}
