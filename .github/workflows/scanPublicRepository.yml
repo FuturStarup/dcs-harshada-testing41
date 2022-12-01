@@ -91,7 +91,7 @@ jobs:
             if [ $ENFORCE = true ]
             then
                 echo -n "Set '$(_jq '.name')' repository to  ... ";
-                [[ $(gh api -X PATCH repos/${ORGANIZATION_NAME}/$(_jq '.name') -f visibility=${TYPE} | jq ".visibility")  = ${TYPE} ]] \
+                [[ $(gh api -X PATCH repos/${ORGANIZATION_NAME}/$(_jq '.name') -f visibility=${TYPE} | jq ".visibility")  = \"${TYPE}\" ]] \
                   && echo "ok" || (
                     echo "failed";
                     exit 1
