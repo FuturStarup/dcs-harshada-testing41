@@ -85,7 +85,7 @@ jobs:
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
             if [ $REPORT  = true ]
             then
-              echo "Repository \'$(_jq '.name')\' is public, please updated its visibility to \'${TYPE}\'"
+              echo "Repository '$(_jq '.name')' is public, please updated its visibility to '${TYPE}'"
             fi
             
             if [ $ENFORCE = true ]
