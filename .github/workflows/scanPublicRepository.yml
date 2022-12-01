@@ -83,12 +83,12 @@ jobs:
           set -x
           for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
-            if [ ${{ REPORT }}  = true ]
+            if [ $REPORT  = true ]
             then
               echo "Repository \'$(_jq '.name')\' is public, please updated its visibility to \'${TYPE}\'"
             fi
             
-            if [ ${{ ENFORCE }}  = true ]
+            if [ $ENFORCE = true ]
             then
                 echo -n "Set '$(_jq '.name')' repository to  ... ";
                 [[ $(gh api -X PATCH repos/${ORGANIZATION_NAME}/$(_jq '.name') -f visibility=${TYPE} | jq ".visibility")  = "${TYPE}" ]] \
