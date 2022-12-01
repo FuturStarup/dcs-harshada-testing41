@@ -76,19 +76,25 @@ jobs:
           REPOSITORIES: ${{ steps.list-repos.outputs.repos }}
           ORGANIZATION_NAME: ${{ inputs.organization_name}}
           TYPE: ${{ inputs.new_type }}
+          REPORT: ${{ inputs.report }}
+          ENFORCE: ${{ inputs.enforce }}
           
         run: |
           set -x
           for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
-            echo "yes"
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
-            [[ ${{ inputs.report }}  = "true" ]] \
-              && echo "::warning repository_name=$(_jq '.name')::Repository is public, please updated its visibility to "|| (
+            if [ ${ REPORT }  = true ]
+            then
+              echo "Repository \'$(_jq '.name')\' is public, please updated its visibility to \'${TYPE}\'"
+            fi
+            
+            if [ ENFORCE  = true ]
+            then
                 echo -n "Set '$(_jq '.name')' repository to  ... ";
                 [[ $(gh api -X PATCH repos/${ORGANIZATION_NAME}/$(_jq '.name') -f visibility=${TYPE} | jq ".visibility")  = "${TYPE}" ]] \
                   && echo "ok" || (
                     echo "failed";
                     exit 1
                 )
-              )
+            fi
           done
