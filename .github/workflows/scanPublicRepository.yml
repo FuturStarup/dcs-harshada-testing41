@@ -68,7 +68,7 @@ jobs:
           GH_TOKEN: ${{ secrets.token }}
           ORGANIZATION_NAME: ${{ inputs.organization_name}}
         run: |
-          echo "repos=$(gh search repos --owner ${ORGANIZATION_NAME} --visibility=public --json name)" >> $env:GITHUB_OUTPUT
+          echo "repos=$(gh search repos --owner FuturStarup --visibility=public --json name)" >> $env:GITHUB_OUTPUT
 
       - name: Scan public repositories
         env:
