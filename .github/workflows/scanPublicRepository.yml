@@ -75,16 +75,17 @@ jobs:
           GH_TOKEN: ${{ secrets.token}}
           REPOSITORIES: ${{ steps.list-repos.outputs.repos }}
           ORGANIZATION_NAME: ${{ inputs.organization_name}}
+          TYPE: ${{ inputs.type }}
           
         run: |
           echo "test"
           for repo in $(echo "${REPOSITORIES}" | jq -r '.[] | @base64'); do
             echo "yes"
             _jq() { echo ${repo} | base64 --decode | jq -r ${1}; }
-            [[ ${{ inputs.report}}  = "true" ]] \
+            [[ ${{ inputs.report }}  = "true" ]] \
               && echo "::warning repository_name=$(_jq '.name')::Repository is public, please updated its visibility to "|| (
                 echo -n "Set '$(_jq '.name')' repository to  ... ";
-                [[ $(gh api -X PATCH repos/${ORGANIZATION_NAME}/$(_jq '.name') -f visibility='${{inputs.type}}' | jq ".visibility")  = ${{inputs.type}} ]] \
+                [[ $(gh api -X PATCH repos/${ORGANIZATION_NAME}/$(_jq '.name') -f visibility='${TYPE}' | jq ".visibility")  = ${TYPE} ]] \
                   && echo "ok" || (
                     echo "failed";
                     exit 1
