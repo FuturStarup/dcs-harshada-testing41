@@ -15,7 +15,8 @@ jobs:
       report: false
       enforce: true
       runner_name: ubuntu-latest
-    secrets: inherit
+    secrets:
+      token: ${{ secrets.token }}
 
 
   Scanning-Terraform-modules-in-repositories:
