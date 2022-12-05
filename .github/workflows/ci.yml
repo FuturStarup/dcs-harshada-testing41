@@ -15,5 +15,4 @@ jobs:
       report: true
       enforce: false
       runner_name: ubuntu-latest
-    secrets:
-      token: ${{ secrets.token }}
+    secrets: inherit
