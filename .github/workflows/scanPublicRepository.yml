@@ -30,7 +30,6 @@ on:
         description: 'topics list separated by commas. Ex: topic1,topic2 . Ps: let this empty to scan all repositories',
         required: false
         type: string
-
     secrets:
       token:
         required: true
