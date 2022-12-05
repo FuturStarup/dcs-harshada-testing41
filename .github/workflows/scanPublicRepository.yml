@@ -80,7 +80,7 @@ jobs:
           ORGANIZATION_NAME: ${{ inputs.organization_name}}
           TOPICS: ${{ inputs.topics}}
         run: |
-          if [ $TOPICS = '' ]
+          if [ -z "$TOPICS" ]
           then
             echo "repos=$(gh search repos --owner ${ORGANIZATION_NAME} --visibility=public --json name)" >> $GITHUB_OUTPUT
           else
