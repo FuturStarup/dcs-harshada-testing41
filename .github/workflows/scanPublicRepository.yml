@@ -26,6 +26,11 @@ on:
         description: 'Runner name'
         default: ubuntu-latest
         type: string
+      topics:
+        description: 'topics list separated by commas. Ex: topic1,topic2 . Ps: let this empty to scan all repositories',
+        required: false
+        type: string
+
     secrets:
       token:
         required: true
@@ -74,8 +79,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.token }}
           ORGANIZATION_NAME: ${{ inputs.organization_name}}
+          TOPICS: ${{ inputs.topics}}
         run: |
-          echo "repos=$(gh search repos --owner FuturStarup --visibility=public --json name)" >> $GITHUB_OUTPUT
+          if [ $TOPICS = '' ]
+          then
+            echo "repos=$(gh search repos --owner ${ORGANIZATION_NAME} --visibility=public --json name)" >> $GITHUB_OUTPUT
+          elif
+            echo "repos=$(gh search repos --topic ${TOPICS} --owner ${ORGANIZATION_NAME} --json name)" >> $GITHUB_OUTPUT
+          fi
 
       - name: Scan public repositories
         env:
