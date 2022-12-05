@@ -84,7 +84,7 @@ jobs:
           if [ $TOPICS = '' ]
           then
             echo "repos=$(gh search repos --owner ${ORGANIZATION_NAME} --visibility=public --json name)" >> $GITHUB_OUTPUT
-          elif
+          else
             echo "repos=$(gh search repos --topic ${TOPICS} --owner ${ORGANIZATION_NAME} --json name)" >> $GITHUB_OUTPUT
           fi
 
