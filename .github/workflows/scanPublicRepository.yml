@@ -84,7 +84,7 @@ jobs:
           then
             echo "repos=$(gh search repos --owner ${ORGANIZATION_NAME} --visibility=public --json name)" >> $GITHUB_OUTPUT
           else
-            echo "repos=$(gh search repos --topic ${TOPICS} --owner ${ORGANIZATION_NAME} --json name)" >> $GITHUB_OUTPUT
+            echo "repos=$(gh search repos --topic ${TOPICS} --owner ${ORGANIZATION_NAME} --visibility=public --json name)" >> $GITHUB_OUTPUT
           fi
 
       - name: Scan public repositories
