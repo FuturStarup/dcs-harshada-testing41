@@ -15,4 +15,5 @@ jobs:
       report: true
       enforce: false
       runner_name: ubuntu-latest
+      topics: test1, test2
     secrets: inherit
