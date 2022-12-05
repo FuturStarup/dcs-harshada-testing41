@@ -105,9 +105,3 @@ jobs:
                 )
             fi
           done
-      - uses: github/codeql-action/upload-sarif@v2
-        with:
-          # Path to SARIF file relative to the root of the repository
-          sarif_file: results.sarif
-          category: my-public-repositories-scan
-
