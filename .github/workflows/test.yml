@@ -8,7 +8,7 @@ jobs:
     uses: OneCloudAutomation/git-assurance/.github/workflows/repositoryRemediation.yml@v1
     with:
       organization_name: GLB-CES-PublicCloud-Google
-      topics: test1, test2de
+      topics: test
       branch_names: plan
       terraform_dependency_validation: 'enabled'
       code_quality_validation: 'enabled'
