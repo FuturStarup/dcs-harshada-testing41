@@ -1,8 +1,14 @@
+name: Tests
+on:
+  push:
+    branches:
+      - main
+jobs:  
   compliance:
     uses: OneCloudAutomation/git-assurance/.github/workflows/repositoryRemediation.yml@v1
     with:
       organization_name: GLB-CES-PublicCloud-Google
-      topics: dcs-gcp-sandbox
+      topics: test1, test2de
       branch_names: plan
       terraform_dependency_validation: 'enabled'
       code_quality_validation: 'enabled'
