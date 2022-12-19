@@ -1,0 +1,11 @@
+  compliance:
+    uses: OneCloudAutomation/git-assurance/.github/workflows/repositoryRemediation.yml@v1
+    with:
+      organization_name: GLB-CES-PublicCloud-Google
+      topics: dcs-gcp-sandbox
+      branch_names: plan
+      terraform_dependency_validation: 'enabled'
+      code_quality_validation: 'enabled'
+      repository_desired_type: internal
+      enforce: true
+    secrets: inherit
