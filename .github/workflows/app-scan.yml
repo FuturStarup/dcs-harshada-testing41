@@ -14,7 +14,7 @@ jobs:
         repository: FuturStarup/dcs-harshada-testing41
     - name: Initiate scan
       run: |
-        curl -X POST -H "Authorization: Bearer ${{ secrets.APP_SCAN_API_KEY }}" -H "Content-Type: application/json" -d '{"scan_type":"static","scan_name":"Terraform Scan","scan_description":"Scan of Terraform modules","target_url":"https://github.com/FuturStarup/dcs-harshada-testing41.git"}' https://cloud.appscan.com/api/v1/scans
+        curl -X POST -H "Authorization: Bearer ${{ secrets.APP_SCAN_API_KEY }}" -H "Content-Type: application/json" -d '{"scan_type":"StaticAnalyzer","scan_name":"Terraform Scan","scan_description":"Scan of Terraform modules","target_url":"https://github.com/FuturStarup/dcs-harshada-testing41.git"}' https://cloud.appscan.com/api/v2/Scans/StaticAnalyzer
     - name: Get the scan id
       id: scan_id
       run: echo "scan_id=${{ steps.initiate_scan.outputs.scan_id }}"
@@ -24,7 +24,7 @@ jobs:
       run: |
         while true; do
           echo "Checking scan status..."
-          status=$(curl -s -H "Authorization: Bearer ${{ secrets.APP_SCAN_API_KEY }}" https://cloud.appscan.com/api/v1/scans/${{ env.scan_id }} | jq -r '.status')
+          status=$(curl -s -H "Authorization: Bearer ${{ secrets.APP_SCAN_API_KEY }}" https://cloud.appscan.com/api/v2/scans/${{ env.scan_id }} | jq -r '.status')
           if [[ $status == "completed" ]]; then
             echo "Scan completed"
             break
@@ -33,6 +33,6 @@ jobs:
         done
     - name: Get the vulnerabilities
       run: |
-        curl -s -H "Authorization: Bearer ${{ secrets.APP_SCAN_API_KEY }}" https://cloud.appscan.com/api/v1/scans/${{ env.scan_id }}/findings > findings.json
+        curl -s -H "Authorization: Bearer ${{ secrets.APP_SCAN_API_KEY }}" https://cloud.appscan.com/api/v2/Scans/StaticAnalyzerExecution/${{ env.scan_id }} > findings.json
 
 
