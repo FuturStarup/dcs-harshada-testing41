@@ -1,0 +1,38 @@
+name: AppScan Cloud Scan
+on:
+  push:
+    branches:
+      - main-test
+
+jobs:
+  appscan-cloud-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        repository: FuturStarup/dcs-harshada-testing41
+    - name: Initiate scan
+      run: |
+        curl -X POST -H "Authorization: Bearer ${{ secrets.APP_SCAN_API_KEY }}" -H "Content-Type: application/json" -d '{"scan_type":"static","scan_name":"Terraform Scan","scan_description":"Scan of Terraform modules","target_url":"https://github.com/FuturStarup/dcs-harshada-testing41.git"}' https://cloud.appscan.com/api/v1/scans
+    - name: Get the scan id
+      id: scan_id
+      run: echo "scan_id=${{ steps.initiate_scan.outputs.scan_id }}"
+      env:
+        scan_id: ${{ steps.initiate_scan.outputs.scan_id }}
+    - name: Wait for the scan to complete
+      run: |
+        while true; do
+          echo "Checking scan status..."
+          status=$(curl -s -H "Authorization: Bearer ${{ secrets.APP_SCAN_API_KEY }}" https://cloud.appscan.com/api/v1/scans/${{ env.scan_id }} | jq -r '.status')
+          if [[ $status == "completed" ]]; then
+            echo "Scan completed"
+            break
+          fi
+          sleep 60
+        done
+    - name: Get the vulnerabilities
+      run: |
+        curl -s -H "Authorization: Bearer ${{ secrets.APP_SCAN_API_KEY }}" https://cloud.appscan.com/api/v1/scans/${{ env.scan_id }}/findings > findings.json
+
+
