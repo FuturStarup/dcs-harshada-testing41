@@ -2,7 +2,7 @@ name: Tests
 on:
   push:
     branches:
-      - main
+      - main-test
 jobs:  
   compliance:
     uses: OneCloudAutomation/git-assurance/.github/workflows/repositoryRemediation.yml@v1
