@@ -2,7 +2,7 @@ name: AppScan Cloud Scan
 on:
   push:
     branches:
-      - main-test
+      - main
 
 jobs:
   appscan-cloud-scan:
